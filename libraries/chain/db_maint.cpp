@@ -1490,10 +1490,19 @@ void database::perform_chain_maintenance(const signed_block& next_block, const g
                }
             });
 
+            bool is_committee_member = [&]() {
+               const auto& idx = d.get_index_type<committee_member_index>().indices().get<by_account>();
+               const account_id_type account = stake_account.get_id();
+               auto itr = idx.find(account);
+               return ( itr != idx.end() );
+            }();
+
             for( vote_id_type id : opinion_account.options.votes )
             {
                uint32_t offset = id.instance();
                uint32_t type = std::min( id.type(), vote_id_type::vote_type::worker ); // cap the data
+               if (type == vote_id_type::vote_type::worker && !is_committee_member)
+                  continue;
                // if they somehow managed to specify an illegal offset, ignore it.
                if( offset < d._vote_tally_buffer.size() )
                   d._vote_tally_buffer[offset] += voting_stake[type];

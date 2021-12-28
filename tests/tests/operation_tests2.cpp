@@ -1158,6 +1158,7 @@ BOOST_AUTO_TEST_CASE( worker_pay_test )
 { try {
    INVOKE(worker_create_test);
    GET_ACTOR(nathan);
+   create_committee_member(nathan_id(db)).id;
    generate_blocks(db.get_dynamic_global_properties().next_maintenance_time);
    transfer(committee_account, nathan_id, asset(100000));
 
